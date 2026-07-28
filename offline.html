@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لا يوجد اتصال بالإنترنت | الحسوبابابي</title>
+<meta name="theme-color" content="#0B0F19">
+<style>
+  :root{
+    --ink:#0B0F19; --accent:#00A8E8; --accent-2:#16DB93;
+    --text:#333B4D; --muted:#7C8499; --border:#E3E8F0;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:'Cairo',sans-serif;min-height:100vh;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;padding:32px;
+    background:#F4F6FA;color:var(--text);
+  }
+  .logo-mark{width:64px;height:64px;margin-bottom:24px;}
+  h1{font-size:clamp(20px,5vw,26px);font-weight:900;color:var(--ink);margin-bottom:12px;}
+  p{color:var(--muted);font-size:15px;max-width:380px;margin-bottom:28px;line-height:1.8;}
+  .status-dot{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--border);
+    padding:8px 16px;border-radius:100px;font-size:13px;font-weight:700;color:var(--ink);margin-bottom:24px;}
+  .status-dot span{width:8px;height:8px;border-radius:50%;background:#E4483A;flex-shrink:0;}
+  button{
+    background:var(--accent);color:#fff;border:none;padding:14px 28px;border-radius:12px;
+    font-family:inherit;font-weight:800;font-size:14.5px;cursor:pointer;
+    box-shadow:0 8px 20px rgba(0,168,232,.28);
+  }
+  button:active{transform:scale(.97);}
+  .hint{margin-top:20px;font-size:13px;color:var(--muted);}
+</style>
+</head>
+<body>
+  <svg class="logo-mark" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect x="3" y="3" width="94" height="94" rx="24" fill="#0B0F19"/>
+    <path d="M58 20 H78 V40" fill="none" stroke="#16DB93" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M42 80 H22 V60" fill="none" stroke="#16DB93" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="50" cy="50" r="17" fill="none" stroke="#00A8E8" stroke-width="9"/>
+    <circle cx="50" cy="50" r="7" fill="#00A8E8"/>
+  </svg>
+
+  <span class="status-dot"><span></span> لا يوجد اتصال بالإنترنت</span>
+  <h1>الصفحة غير متاحة حالياً</h1>
+  <p>يبدو أن اتصالك بالإنترنت منقطع. تصفّح الصفحات التي زرتها سابقاً ما زال متاحاً، وسنعيد تحميل المحتوى الكامل بمجرد عودة الاتصال.</p>
+
+  <button onclick="location.reload()">إعادة المحاولة</button>
+  <p class="hint">💬 يمكنك أيضاً حفظ رقم واتساب الشركة للتواصل المباشر عند عودة الشبكة.</p>
+
+  <script>
+    window.addEventListener('online', () => location.reload());
+  </script>
+</body>
+</html>
