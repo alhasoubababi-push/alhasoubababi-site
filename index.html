@@ -2028,10 +2028,27 @@ footer .bottom{text-align:center;font-size:12.5px;color:#6C7593;}
     setTimeout(() => successBox.classList.remove('show'), 6000);
   }
 
+  // يرسل نسخة من الطلب للوحة تحكم الإدارة (بدون تعطيل تجربة العميل لو فشل الاتصال)
+  function saveLeadToDashboard() {
+    const ADMIN_API_BASE = 'https://alhasoubababi-push.vercel.app';
+    fetch(`${ADMIN_API_BASE}/api/leads`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: nameInput.value.trim(),
+        phone: phoneInput.value.trim(),
+        facilityType: pillState.facility,
+        cameraCount: pillState.cameras,
+        city: citySelect.value,
+      }),
+    }).catch(() => {}); // فشل حفظ النسخة الداخلية لا يوقف إرسال الطلب للعميل
+  }
+
   // primary action: send via WhatsApp
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     if (!validateForm()) return;
+    saveLeadToDashboard();
     const message = encodeURIComponent(buildWhatsAppMessage());
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
     showSuccess();
@@ -2040,6 +2057,7 @@ footer .bottom{text-align:center;font-size:12.5px;color:#6C7593;}
   // secondary action: regular submission (no WhatsApp redirect)
   document.getElementById('regularSubmit').addEventListener('click', () => {
     if (!validateForm()) return;
+    saveLeadToDashboard();
     showSuccess();
     form.reset();
     document.querySelectorAll('.fp-option-group .fp-pill.active').forEach(p => p.classList.remove('active'));
