@@ -75,7 +75,51 @@ tr:last-child td{border-bottom:none;}
 .offer-panel input,.offer-panel textarea,.offer-panel select{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13.5px;}
 .result-box{margin-top:16px;padding:12px;border-radius:10px;background:var(--bg);font-size:13px;display:none;}
 
+/* عرض السعر PDF */
+.quote-actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;}
+.quote-actions button{flex:1;min-width:160px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:10px;font-size:13.5px;font-weight:700;z-index:999;display:none;}
+
+/* حالة العميل — شارات ملوّنة حسب مرحلة المسار */
+.status-pill{display:inline-block;padding:4px 10px;border-radius:100px;font-size:11.5px;font-weight:800;white-space:nowrap;}
+.status-pill.s0{background:#EAF0FF;color:#3B5BDB;}
+.status-pill.s1{background:#E6F7FF;color:#0B7DAD;}
+.status-pill.s2{background:#FFF4E0;color:#B4770A;}
+.status-pill.s3{background:#F2E9FF;color:#7C3AED;}
+.status-pill.s4{background:#E4FBEE;color:#0E9F5B;}
+.status-pill.s5{background:#E0FBF3;color:#0A8F6C;}
+.status-pill.s6{background:#F0F0F5;color:#5A5F73;}
+
+.reminder-badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--text);}
+.reminder-badge.due{color:var(--danger);}
+.reminder-badge.none{color:var(--muted);font-weight:500;}
+
+.btn-details{background:var(--ink);color:#fff;padding:7px 14px;border-radius:8px;font-size:12.5px;font-weight:700;white-space:nowrap;}
+
+/* ---------- مودال تفاصيل العميل ---------- */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(11,15,25,.55);z-index:1000;align-items:flex-start;justify-content:center;padding:30px 16px;overflow-y:auto;}
+.modal-overlay.active{display:flex;}
+.modal-box{background:#fff;border-radius:16px;width:100%;max-width:520px;padding:24px;margin-top:20px;}
+.modal-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;}
+.modal-header h3{font-size:18px;font-weight:900;color:var(--ink);}
+.modal-close{background:var(--bg);width:30px;height:30px;border-radius:8px;font-size:14px;color:var(--muted);}
+.modal-section{margin-bottom:14px;}
+.modal-section label{display:block;font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:6px;}
+.modal-tabs{display:flex;gap:6px;margin:22px 0 14px;border-bottom:1px solid var(--border);}
+.modal-tab{padding:9px 4px;margin-left:16px;font-size:13px;font-weight:700;color:var(--muted);background:transparent;border-bottom:2px solid transparent;}
+.modal-tab.active{color:var(--ink);border-bottom-color:var(--accent);}
+.modal-tab-panel{display:none;}
+.modal-tab-panel.active{display:block;}
+.call-form{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;background:var(--bg);padding:14px;border-radius:10px;}
+.call-form select,.call-form input{padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;}
+.timeline{display:flex;flex-direction:column;gap:10px;max-height:260px;overflow-y:auto;}
+.timeline-item{padding:10px 12px;background:var(--bg);border-radius:10px;font-size:12.5px;}
+.timeline-item .t-top{display:flex;justify-content:space-between;font-weight:700;color:var(--ink);margin-bottom:3px;}
+.timeline-item .t-date{color:var(--muted);font-weight:500;font-size:11.5px;}
+.timeline-item .t-note{color:var(--text);margin-top:3px;}
+.timeline-item .t-del{color:var(--danger);font-weight:700;cursor:pointer;}
 </style>
 </head>
 <body>
@@ -167,14 +211,71 @@ tr:last-child td{border-bottom:none;}
   <div class="panel" id="panel-customers">
     <div class="panel-header">
       <h2>العملاء</h2>
-      <button class="btn-outline" id="refreshCustomers">🔄 تحديث</button>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--ink);">
+          <input type="checkbox" id="onlyDueFilter"> متابعات مستحقة فقط
+        </label>
+        <button class="btn-outline" id="refreshCustomers">🔄 تحديث</button>
+      </div>
     </div>
     <div class="card-table">
       <table>
-        <thead><tr><th>الاسم</th><th>الهاتف</th><th>المدينة</th><th>عدد الطلبات</th><th>آخر طلب</th><th>ملاحظة متابعة</th></tr></thead>
+        <thead><tr><th>الاسم</th><th>الهاتف</th><th>المدينة</th><th>حالة العميل</th><th>تذكير المتابعة</th><th>عدد الطلبات</th><th>آخر طلب</th><th></th></tr></thead>
         <tbody id="customersBody"></tbody>
       </table>
       <div class="empty-state" id="customersEmpty" style="display:none;">لسه مفيش عملاء مسجّلين</div>
+    </div>
+  </div>
+
+  <!-- ---- مودال: تفاصيل متابعة العميل ---- -->
+  <div class="modal-overlay" id="customerModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <h3 id="cmName">—</h3>
+          <p id="cmPhone" dir="ltr" style="color:var(--muted);font-size:13px;"></p>
+        </div>
+        <button class="modal-close" id="closeCustomerModal">✕</button>
+      </div>
+
+      <div class="modal-section">
+        <label>حالة العميل</label>
+        <select id="cmStatus" class="status-select" style="width:100%;padding:9px 12px;"></select>
+      </div>
+      <div class="modal-section">
+        <label>تذكير بالمتابعة</label>
+        <input type="date" id="cmReminder" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13.5px;">
+      </div>
+      <div class="modal-section">
+        <label>ملاحظة عامة</label>
+        <textarea id="cmNote" rows="2" placeholder="ملاحظة متابعة..." style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13.5px;"></textarea>
+      </div>
+      <button class="btn-primary" id="cmSaveBtn" style="width:100%;">حفظ التغييرات</button>
+
+      <div class="modal-tabs">
+        <button class="modal-tab active" data-mtab="calls">📞 سجل المكالمات</button>
+        <button class="modal-tab" data-mtab="history">🕓 تاريخ التعديلات</button>
+      </div>
+
+      <div class="modal-tab-panel active" id="mtab-calls">
+        <div class="call-form">
+          <select id="cmCallOutcome">
+            <option value="تم الرد">تم الرد</option>
+            <option value="لم يرد">لم يرد</option>
+            <option value="مشغول">الخط مشغول</option>
+            <option value="رقم غير صحيح">رقم غير صحيح</option>
+          </select>
+          <input type="text" id="cmCallNotes" placeholder="ملاحظة عن المكالمة (اختياري)">
+          <button class="btn-primary" id="cmAddCallBtn">+ تسجيل مكالمة</button>
+        </div>
+        <div id="cmCallsList" class="timeline"></div>
+        <div class="empty-state" id="cmCallsEmpty" style="display:none;padding:24px;">لسه مفيش مكالمات مسجّلة</div>
+      </div>
+
+      <div class="modal-tab-panel" id="mtab-history">
+        <div id="cmHistoryList" class="timeline"></div>
+        <div class="empty-state" id="cmHistoryEmpty" style="display:none;padding:24px;">لسه مفيش تعديلات مسجّلة</div>
+      </div>
     </div>
   </div>
 
@@ -184,6 +285,7 @@ tr:last-child td{border-bottom:none;}
     <div class="offer-tabs">
       <button class="offer-tab active" data-offer="push">🔔 إشعار Push جماعي</button>
       <button class="offer-tab" data-offer="whatsapp">💬 واتساب لعميل محدد</button>
+      <button class="offer-tab" data-offer="quote">🧾 عرض سعر PDF</button>
     </div>
 
     <div class="offer-panel active" id="offer-push">
@@ -207,10 +309,127 @@ tr:last-child td{border-bottom:none;}
       <button class="btn-wa" style="margin-top:16px;" id="genWaLinkBtn">توليد رابط واتساب</button>
       <div class="result-box" id="waResult"></div>
     </div>
+
+    <div class="offer-panel" id="offer-quote">
+      <label>اختر عميل من الطلبات (اختياري)</label>
+      <select id="quoteCustomerSelect"><option value="">— اختر عميل (اختياري) —</option></select>
+
+      <div class="field-row">
+        <div>
+          <label>اسم العميل</label>
+          <input type="text" id="quoteClientName" placeholder="محمد أحمد">
+        </div>
+        <div>
+          <label>رقم الهاتف (للإرسال واتساب)</label>
+          <input type="text" id="quotePhone" placeholder="0912345678">
+        </div>
+      </div>
+
+      <label>الخدمة / وصف العمل</label>
+      <textarea id="quoteService" rows="2" placeholder="تركيب 8 كاميرات مراقبة داخلية وخارجية"></textarea>
+
+      <div class="field-row">
+        <div>
+          <label>السعر</label>
+          <input type="text" id="quotePrice" placeholder="150,000 جنيه">
+        </div>
+        <div>
+          <label>مدة التنفيذ</label>
+          <input type="text" id="quoteDuration" placeholder="3 أيام">
+        </div>
+      </div>
+
+      <label>صلاحية العرض (بالأيام)</label>
+      <input type="number" id="quoteValidity" value="7" min="1">
+
+      <label>ملاحظات إضافية (اختياري)</label>
+      <textarea id="quoteNotes" rows="2" placeholder="شامل الضمان لمدة سنة وصيانة مجانية أول 3 أشهر"></textarea>
+
+      <div class="quote-actions">
+        <button class="btn-outline" id="downloadQuotePdfBtn">🧾 تحميل PDF فقط</button>
+        <button class="btn-wa" id="sendQuoteWaBtn">💬 إرسال العرض واتساب</button>
+      </div>
+      <div class="result-box" id="quoteResult"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ قالب عرض السعر (مخفي — يُستخدم لتوليد PDF فقط) ============ -->
+<div id="quotePdfTemplate" style="position:fixed;top:0;left:-9999px;width:794px;background:#fff;padding:56px 60px;font-family:'Cairo',sans-serif;color:#222;direction:rtl;">
+  <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #0B0F19;padding-bottom:20px;margin-bottom:30px;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <svg width="52" height="52" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="3" y="3" width="94" height="94" rx="24" fill="#0B0F19"/>
+        <path d="M58 20 H78 V40" fill="none" stroke="#16DB93" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M42 80 H22 V60" fill="none" stroke="#16DB93" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="50" cy="50" r="17" fill="none" stroke="#00A8E8" stroke-width="7"/>
+        <circle cx="50" cy="50" r="6" fill="#00A8E8"/>
+      </svg>
+      <div>
+        <div style="font-family:'Tajawal',sans-serif;font-weight:900;font-size:22px;color:#0B0F19;">الحسوبابابي</div>
+        <div style="font-size:12px;color:#7C8499;">حلول تقنية وأمنية متكاملة</div>
+      </div>
+    </div>
+    <div style="text-align:left;">
+      <div style="font-family:'Tajawal',sans-serif;font-weight:900;font-size:26px;color:#00A8E8;">عرض سعر</div>
+      <div style="font-size:12.5px;color:#7C8499;margin-top:4px;">رقم العرض: <span id="qpNumber"></span></div>
+      <div style="font-size:12.5px;color:#7C8499;">التاريخ: <span id="qpDate"></span></div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:20px;margin-bottom:30px;">
+    <div style="flex:1;background:#F4F6FA;border-radius:12px;padding:16px 20px;">
+      <div style="font-size:11.5px;font-weight:700;color:#7C8499;margin-bottom:6px;">مقدم إلى</div>
+      <div style="font-size:16px;font-weight:800;color:#0B0F19;" id="qpClientName"></div>
+      <div style="font-size:13px;color:#333B4D;margin-top:4px;" id="qpClientPhone"></div>
+    </div>
+    <div style="flex:1;background:#F4F6FA;border-radius:12px;padding:16px 20px;">
+      <div style="font-size:11.5px;font-weight:700;color:#7C8499;margin-bottom:6px;">صادر عن</div>
+      <div style="font-size:16px;font-weight:800;color:#0B0F19;">الحسوبابابي</div>
+      <div style="font-size:13px;color:#333B4D;margin-top:4px;">السودان</div>
+    </div>
+  </div>
+
+  <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
+    <thead>
+      <tr style="background:#0B0F19;color:#fff;">
+        <th style="padding:12px 16px;text-align:right;font-size:13px;">الخدمة / الوصف</th>
+        <th style="padding:12px 16px;text-align:center;font-size:13px;width:140px;">مدة التنفيذ</th>
+        <th style="padding:12px 16px;text-align:left;font-size:13px;width:170px;">السعر</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom:1px solid #E3E8F0;">
+        <td style="padding:16px;font-size:14px;line-height:1.7;" id="qpService"></td>
+        <td style="padding:16px;font-size:14px;text-align:center;white-space:nowrap;" id="qpDuration"></td>
+        <td style="padding:16px;font-size:14px;text-align:left;font-weight:800;white-space:nowrap;" id="qpPrice"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="display:flex;justify-content:flex-end;margin-bottom:30px;">
+    <div style="background:#E4FBEE;border-radius:12px;padding:14px 24px;min-width:240px;text-align:left;">
+      <div style="font-size:12px;color:#0E9F5B;font-weight:700;">الإجمالي</div>
+      <div style="font-size:22px;font-weight:900;color:#0E9F5B;" id="qpTotal"></div>
+    </div>
+  </div>
+
+  <div id="qpNotesWrap" style="margin-bottom:30px;">
+    <div style="font-size:12.5px;font-weight:700;color:#7C8499;margin-bottom:6px;">ملاحظات</div>
+    <div style="font-size:13px;color:#333B4D;line-height:1.8;" id="qpNotes"></div>
+  </div>
+
+  <div style="font-size:11.5px;color:#7C8499;line-height:1.9;border-top:1px solid #E3E8F0;padding-top:16px;">
+    هذا العرض صالح لمدة <span id="qpValidity"></span> من تاريخ الإصدار. الأسعار قابلة للتغيير بعد انتهاء الصلاحية.<br>
+    نشكر ثقتكم بشركة الحسوبابابي.
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- مكتبات توليد PDF من HTML (لعروض الأسعار) — تعمل بالكامل في المتصفح بدون سيرفر -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
 // رابط سيرفر الإدارة/الإشعارات الفعلي
@@ -291,7 +510,7 @@ document.querySelectorAll('.tab-btn').forEach((btn) => {
     if (btn.dataset.tab === 'leads') loadLeads();
     if (btn.dataset.tab === 'products') loadProducts();
     if (btn.dataset.tab === 'customers') loadCustomers();
-    if (btn.dataset.tab === 'offers') populateWaCustomerSelect();
+    if (btn.dataset.tab === 'offers') { populateWaCustomerSelect(); populateQuoteCustomerSelect(); }
   });
 });
 
@@ -414,37 +633,188 @@ document.getElementById('saveProductBtn').addEventListener('click', async () => 
 });
 
 /* ---------- العملاء ---------- */
+const PIPELINE_STATUSES = ['جديد', 'تم الاتصال', 'زيارة ميدانية', 'عرض سعر', 'تم الاتفاق', 'تم التركيب', 'صيانة دورية'];
+let currentCustomers = [];
+let activeCustomerPhone = '';
+
+function todayStr() {
+  return new Date().toISOString().slice(0, 10);
+}
+function isReminderDue(reminderAt) {
+  if (!reminderAt) return false;
+  return reminderAt.slice(0, 10) <= todayStr();
+}
+
 async function loadCustomers() {
-  const customers = await api('/api/admin/customers');
+  currentCustomers = await api('/api/admin/customers');
+  renderCustomers();
+}
+
+function renderCustomers() {
+  const onlyDue = document.getElementById('onlyDueFilter').checked;
+  const list = onlyDue ? currentCustomers.filter((c) => isReminderDue(c.reminderAt)) : currentCustomers;
+
   const body = document.getElementById('customersBody');
   const empty = document.getElementById('customersEmpty');
   body.innerHTML = '';
-  empty.style.display = customers.length ? 'none' : 'block';
+  empty.style.display = list.length ? 'none' : 'block';
+  if (!list.length) empty.textContent = onlyDue ? 'مفيش متابعات مستحقة دلوقتي' : 'لسه مفيش عملاء مسجّلين';
 
-  customers.forEach((c) => {
+  list.forEach((c) => {
+    const statusIdx = PIPELINE_STATUSES.indexOf(c.status);
+    const due = isReminderDue(c.reminderAt);
+    const reminderHtml = c.reminderAt
+      ? `<span class="reminder-badge ${due ? 'due' : ''}">${due ? '⏰' : '📅'} ${formatDate(c.reminderAt)}</span>`
+      : `<span class="reminder-badge none">— بلا تذكير</span>`;
+
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${escapeHtml(c.name)}</td>
       <td dir="ltr" style="text-align:left;">${escapeHtml(c.phone)}</td>
       <td>${escapeHtml(c.city || '—')}</td>
+      <td><span class="status-pill s${statusIdx >= 0 ? statusIdx : 0}">${escapeHtml(c.status || 'جديد')}</span></td>
+      <td>${reminderHtml}</td>
       <td>${c.requestsCount}</td>
       <td style="font-size:12px;color:var(--muted);">${formatDate(c.lastRequestAt)}</td>
-      <td><input class="notes-input" data-phone="${c.phone}" value="${escapeHtml(c.note || '')}" placeholder="ملاحظة متابعة..."></td>
+      <td><button class="btn-details" data-open="${c.phone}">التفاصيل والمتابعة</button></td>
     `;
     body.appendChild(tr);
   });
 
-  body.querySelectorAll('[data-phone]').forEach((el) => {
-    el.addEventListener('change', async () => {
-      await api(`/api/admin/customers/${encodeURIComponent(el.dataset.phone)}/note`, {
-        method: 'PATCH',
-        body: JSON.stringify({ note: el.value }),
-      });
-      showToast('تم حفظ الملاحظة');
-    });
+  body.querySelectorAll('[data-open]').forEach((el) => {
+    el.addEventListener('click', () => openCustomerModal(el.dataset.open));
   });
 }
 document.getElementById('refreshCustomers').addEventListener('click', loadCustomers);
+document.getElementById('onlyDueFilter').addEventListener('change', renderCustomers);
+
+/* ---- مودال تفاصيل العميل ---- */
+function getActiveCustomer() {
+  return currentCustomers.find((c) => c.phone === activeCustomerPhone);
+}
+
+function openCustomerModal(phone) {
+  activeCustomerPhone = phone;
+  const c = getActiveCustomer();
+  if (!c) return;
+
+  document.getElementById('cmName').textContent = c.name;
+  document.getElementById('cmPhone').textContent = c.phone;
+
+  const statusSelect = document.getElementById('cmStatus');
+  statusSelect.innerHTML = PIPELINE_STATUSES.map((s) => `<option value="${s}" ${s === c.status ? 'selected' : ''}>${s}</option>`).join('');
+
+  document.getElementById('cmReminder').value = c.reminderAt ? c.reminderAt.slice(0, 10) : '';
+  document.getElementById('cmNote').value = c.note || '';
+  document.getElementById('cmCallOutcome').value = 'تم الرد';
+  document.getElementById('cmCallNotes').value = '';
+
+  switchModalTab('calls');
+  renderCallsList(c);
+  renderHistoryList(c);
+
+  document.getElementById('customerModal').classList.add('active');
+}
+function closeCustomerModal() {
+  document.getElementById('customerModal').classList.remove('active');
+  activeCustomerPhone = '';
+}
+document.getElementById('closeCustomerModal').addEventListener('click', closeCustomerModal);
+document.getElementById('customerModal').addEventListener('click', (e) => {
+  if (e.target.id === 'customerModal') closeCustomerModal();
+});
+
+document.querySelectorAll('.modal-tab').forEach((btn) => {
+  btn.addEventListener('click', () => switchModalTab(btn.dataset.mtab));
+});
+function switchModalTab(tab) {
+  document.querySelectorAll('.modal-tab').forEach((b) => b.classList.toggle('active', b.dataset.mtab === tab));
+  document.querySelectorAll('.modal-tab-panel').forEach((p) => p.classList.remove('active'));
+  document.getElementById(`mtab-${tab}`).classList.add('active');
+}
+
+function renderCallsList(c) {
+  const list = document.getElementById('cmCallsList');
+  const empty = document.getElementById('cmCallsEmpty');
+  const calls = c.calls || [];
+  list.innerHTML = '';
+  empty.style.display = calls.length ? 'none' : 'block';
+
+  calls.forEach((call) => {
+    const item = document.createElement('div');
+    item.className = 'timeline-item';
+    item.innerHTML = `
+      <div class="t-top">
+        <span>📞 ${escapeHtml(call.outcome)}</span>
+        <span class="t-date">${formatDateTime(call.at)} <span class="t-del" data-del-call="${call.id}"> · حذف</span></span>
+      </div>
+      ${call.notes ? `<div class="t-note">${escapeHtml(call.notes)}</div>` : ''}
+    `;
+    list.appendChild(item);
+  });
+
+  list.querySelectorAll('[data-del-call]').forEach((el) => {
+    el.addEventListener('click', async () => {
+      if (!confirm('حذف سجل هذه المكالمة؟')) return;
+      await api(`/api/admin/customers/${encodeURIComponent(activeCustomerPhone)}/calls/${el.dataset.delCall}`, { method: 'DELETE' });
+      await refreshActiveCustomerInModal();
+    });
+  });
+}
+
+const HISTORY_FIELD_LABELS = { status: 'حالة العميل', note: 'ملاحظة المتابعة', reminderAt: 'تذكير المتابعة', call: 'مكالمة' };
+function renderHistoryList(c) {
+  const list = document.getElementById('cmHistoryList');
+  const empty = document.getElementById('cmHistoryEmpty');
+  const history = [...(c.history || [])].reverse();
+  list.innerHTML = '';
+  empty.style.display = history.length ? 'none' : 'block';
+
+  history.forEach((h) => {
+    const label = HISTORY_FIELD_LABELS[h.field] || h.field;
+    const desc = h.field === 'call'
+      ? `تم تسجيل مكالمة: ${escapeHtml(h.to)}`
+      : h.from
+        ? `${label}: من «${escapeHtml(String(h.from))}» إلى «${escapeHtml(String(h.to))}»`
+        : `${label}: تم تعيينها إلى «${escapeHtml(String(h.to || '—'))}»`;
+    const item = document.createElement('div');
+    item.className = 'timeline-item';
+    item.innerHTML = `<div class="t-top"><span>🕓 ${desc}</span></div><div class="t-date">${formatDateTime(h.at)}</div>`;
+    list.appendChild(item);
+  });
+}
+
+async function refreshActiveCustomerInModal() {
+  await loadCustomers();
+  const c = getActiveCustomer();
+  if (c) {
+    renderCallsList(c);
+    renderHistoryList(c);
+  }
+}
+
+document.getElementById('cmSaveBtn').addEventListener('click', async () => {
+  const payload = {
+    status: document.getElementById('cmStatus').value,
+    note: document.getElementById('cmNote').value,
+    reminderAt: document.getElementById('cmReminder').value || '',
+  };
+  await api(`/api/admin/customers/${encodeURIComponent(activeCustomerPhone)}`, { method: 'PATCH', body: JSON.stringify(payload) });
+  showToast('تم حفظ متابعة العميل');
+  await refreshActiveCustomerInModal();
+});
+
+document.getElementById('cmAddCallBtn').addEventListener('click', async () => {
+  const outcome = document.getElementById('cmCallOutcome').value;
+  const notes = document.getElementById('cmCallNotes').value;
+  await api(`/api/admin/customers/${encodeURIComponent(activeCustomerPhone)}/calls`, {
+    method: 'POST',
+    body: JSON.stringify({ outcome, notes }),
+  });
+  document.getElementById('cmCallNotes').value = '';
+  showToast('تم تسجيل المكالمة');
+  await refreshActiveCustomerInModal();
+});
 
 /* ---------- العروض ---------- */
 document.querySelectorAll('.offer-tab').forEach((btn) => {
@@ -493,6 +863,145 @@ document.getElementById('genWaLinkBtn').addEventListener('click', async () => {
   box.innerHTML = `<a href="${data.link}" target="_blank" style="color:var(--accent);font-weight:700;">فتح المحادثة على واتساب ↗</a>`;
 });
 
+/* ---------- عرض السعر PDF ---------- */
+function populateQuoteCustomerSelect() {
+  const select = document.getElementById('quoteCustomerSelect');
+  select.innerHTML = '<option value="">— اختر عميل (اختياري) —</option>';
+  currentLeads.forEach((lead) => {
+    const opt = document.createElement('option');
+    opt.value = lead.phone;
+    opt.textContent = `${lead.name} — ${lead.phone}`;
+    select.appendChild(opt);
+  });
+}
+document.getElementById('quoteCustomerSelect').addEventListener('change', (e) => {
+  const lead = currentLeads.find((l) => l.phone === e.target.value);
+  if (lead) {
+    document.getElementById('quoteClientName').value = lead.name;
+    document.getElementById('quotePhone').value = lead.phone;
+  }
+});
+
+function nextQuoteNumber() {
+  const year = new Date().getFullYear();
+  const seq = parseInt(localStorage.getItem('hs_quote_seq') || '0', 10) + 1;
+  localStorage.setItem('hs_quote_seq', String(seq));
+  return `HB-${year}-${String(seq).padStart(4, '0')}`;
+}
+
+function getQuoteFormData() {
+  return {
+    clientName: document.getElementById('quoteClientName').value.trim(),
+    phone: document.getElementById('quotePhone').value.trim(),
+    service: document.getElementById('quoteService').value.trim(),
+    price: document.getElementById('quotePrice').value.trim(),
+    duration: document.getElementById('quoteDuration').value.trim(),
+    validity: document.getElementById('quoteValidity').value.trim() || '7',
+    notes: document.getElementById('quoteNotes').value.trim(),
+  };
+}
+
+function validateQuoteData(data, needPhone) {
+  if (!data.clientName || !data.service || !data.price || !data.duration) {
+    showToast('من فضلك أكمل اسم العميل والخدمة والسعر ومدة التنفيذ');
+    return false;
+  }
+  if (needPhone && !data.phone) {
+    showToast('رقم الهاتف مطلوب للإرسال عبر واتساب');
+    return false;
+  }
+  return true;
+}
+
+async function generateQuotePdf(data) {
+  const quoteNumber = nextQuoteNumber();
+  document.getElementById('qpNumber').textContent = quoteNumber;
+  document.getElementById('qpDate').textContent = new Date().toLocaleDateString('ar-EG');
+  document.getElementById('qpClientName').textContent = data.clientName;
+  document.getElementById('qpClientPhone').textContent = data.phone ? `هاتف: ${data.phone}` : '';
+  document.getElementById('qpService').textContent = data.service;
+  document.getElementById('qpDuration').textContent = data.duration;
+  document.getElementById('qpPrice').textContent = data.price;
+  document.getElementById('qpTotal').textContent = data.price;
+  document.getElementById('qpValidity').textContent = `${data.validity} أيام`;
+
+  const notesWrap = document.getElementById('qpNotesWrap');
+  if (data.notes) {
+    notesWrap.style.display = 'block';
+    document.getElementById('qpNotes').textContent = data.notes;
+  } else {
+    notesWrap.style.display = 'none';
+  }
+
+  if (document.fonts && document.fonts.ready) await document.fonts.ready;
+
+  const template = document.getElementById('quotePdfTemplate');
+  const canvas = await html2canvas(template, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+  const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF('p', 'pt', 'a4');
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  const imgHeight = (canvas.height * pageWidth) / canvas.width;
+  pdf.addImage(imgData, 'JPEG', 0, 0, pageWidth, Math.min(imgHeight, pageHeight));
+
+  const fileName = `عرض_سعر_${data.clientName.replace(/\s+/g, '_')}_${quoteNumber}.pdf`;
+  return { pdf, fileName, quoteNumber };
+}
+
+document.getElementById('downloadQuotePdfBtn').addEventListener('click', async () => {
+  const data = getQuoteFormData();
+  if (!validateQuoteData(data, false)) return;
+  const btn = document.getElementById('downloadQuotePdfBtn');
+  const originalLabel = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'جارٍ التجهيز...';
+  try {
+    const { pdf, fileName } = await generateQuotePdf(data);
+    pdf.save(fileName);
+    showToast('تم تحميل ملف عرض السعر');
+  } catch (err) {
+    showToast('حدث خطأ أثناء توليد الملف');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalLabel;
+  }
+});
+
+document.getElementById('sendQuoteWaBtn').addEventListener('click', async () => {
+  const data = getQuoteFormData();
+  if (!validateQuoteData(data, true)) return;
+  const btn = document.getElementById('sendQuoteWaBtn');
+  const originalLabel = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'جارٍ التجهيز...';
+  try {
+    const { pdf, fileName, quoteNumber } = await generateQuotePdf(data);
+    pdf.save(fileName);
+
+    const message = [
+      `عرض سعر رقم ${quoteNumber} — الحسوبابابي`,
+      `العميل: ${data.clientName}`,
+      `الخدمة: ${data.service}`,
+      `مدة التنفيذ: ${data.duration}`,
+      `السعر: ${data.price}`,
+      `صالح لمدة ${data.validity} أيام من تاريخ الإصدار.`,
+      `📎 تم تحميل ملف PDF بتفاصيل العرض — برجاء إرفاقه هنا.`,
+    ].join('\n');
+
+    const linkData = await api('/api/admin/send-offer/whatsapp-link', { method: 'POST', body: JSON.stringify({ phone: data.phone, message }) });
+    const box = document.getElementById('quoteResult');
+    box.style.display = 'block';
+    box.innerHTML = `تم تحميل ملف <b>${escapeHtml(fileName)}</b><br>دوس الرابط ده لفتح واتساب وأرفق الملف يدوياً في نفس المحادثة:<br><a href="${linkData.link}" target="_blank" style="color:var(--accent);font-weight:700;">فتح المحادثة على واتساب ↗</a>`;
+  } catch (err) {
+    showToast('حدث خطأ أثناء التجهيز');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalLabel;
+  }
+});
+
 /* ---------- أدوات عامة ---------- */
 function escapeHtml(str) {
   const div = document.createElement('div');
@@ -503,6 +1012,12 @@ function formatDate(iso) {
   if (!iso) return '—';
   const d = new Date(iso);
   return d.toLocaleDateString('ar-SD', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+function formatDateTime(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleDateString('ar-SD', { year: 'numeric', month: 'short', day: 'numeric' }) +
+    ' — ' + d.toLocaleTimeString('ar-SD', { hour: '2-digit', minute: '2-digit' });
 }
 
 checkAuth();
