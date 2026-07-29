@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>لوحة التحكم | الحسوبابابي</title>
+<title>لوحة التحكم | الحسوبابي</title>
 <meta name="robots" content="noindex, nofollow">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@700;800;900&family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -120,6 +120,36 @@ tr:last-child td{border-bottom:none;}
 .timeline-item .t-date{color:var(--muted);font-weight:500;font-size:11.5px;}
 .timeline-item .t-note{color:var(--text);margin-top:3px;}
 .timeline-item .t-del{color:var(--danger);font-weight:700;cursor:pointer;}
+
+/* المشاريع والخدمات — شبكة كروت */
+.item-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;margin-bottom:20px;}
+.item-card{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;}
+.item-card .thumb{width:100%;height:130px;background:var(--bg);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:32px;overflow:hidden;}
+.item-card .thumb img{width:100%;height:100%;object-fit:cover;}
+.item-card .body{padding:12px 14px;flex:1;display:flex;flex-direction:column;gap:4px;}
+.item-card .body h4{font-size:14px;font-weight:800;color:var(--ink);}
+.item-card .body p{font-size:12px;color:var(--muted);line-height:1.6;flex:1;}
+.item-card .meta{font-size:11px;color:var(--muted);}
+.item-card .actions{display:flex;gap:6px;padding:10px 14px;border-top:1px solid var(--border);flex-wrap:wrap;}
+.item-card .actions button{flex:1;min-width:60px;padding:6px 8px;font-size:11.5px;}
+.item-card.inactive{opacity:.55;}
+.badge-inactive{display:inline-block;background:var(--bg);color:var(--muted);font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:100px;margin-inline-start:6px;}
+
+/* رفع صورة */
+.image-uploader{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+.image-uploader .up-preview{width:90px;height:90px;border-radius:10px;background:var(--bg);border:1.5px dashed var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--muted);font-size:22px;flex-shrink:0;}
+.image-uploader .up-preview img{width:100%;height:100%;object-fit:cover;}
+.image-uploader .up-controls{display:flex;flex-direction:column;gap:6px;}
+.image-uploader .up-status{font-size:11.5px;color:var(--muted);}
+
+/* مكتبة الصور */
+.image-lib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;}
+.image-lib-item{position:relative;border-radius:10px;overflow:hidden;border:1px solid var(--border);aspect-ratio:1;background:var(--bg);}
+.image-lib-item img{width:100%;height:100%;object-fit:cover;display:block;}
+.image-lib-item .lib-del{position:absolute;top:6px;left:6px;background:rgba(228,72,58,.9);color:#fff;width:26px;height:26px;border-radius:8px;font-size:13px;}
+.image-lib-item .lib-copy{position:absolute;bottom:6px;left:6px;right:6px;background:rgba(11,15,25,.75);color:#fff;font-size:10.5px;padding:5px;border-radius:6px;font-weight:700;}
+.order-btns{display:flex;flex-direction:column;gap:2px;}
+.order-btns button{width:26px;height:22px;background:var(--bg);border:1px solid var(--border);border-radius:5px;font-size:11px;}
 </style>
 </head>
 <body>
@@ -127,7 +157,7 @@ tr:last-child td{border-bottom:none;}
 <!-- ============ شاشة تسجيل الدخول ============ -->
 <div id="loginScreen">
   <div class="login-card">
-    <h1>لوحة تحكم الحسوبابابي</h1>
+    <h1>لوحة تحكم الحسوبابي</h1>
     <p>سجّل الدخول لمتابعة الطلبات والعملاء</p>
     <form id="loginForm">
       <div class="field">
@@ -147,13 +177,16 @@ tr:last-child td{border-bottom:none;}
 <!-- ============ اللوحة الرئيسية ============ -->
 <div id="dashboard">
   <div class="topbar">
-    <h1>لوحة تحكم الحسوبابابي</h1>
+    <h1>لوحة تحكم الحسوبابي</h1>
     <button class="logout-btn" id="logoutBtn">تسجيل الخروج</button>
   </div>
 
   <div class="tabs">
     <button class="tab-btn active" data-tab="leads">📋 الطلبات الواردة</button>
     <button class="tab-btn" data-tab="products">💰 المنتجات والأسعار</button>
+    <button class="tab-btn" data-tab="projects">🏗️ المشاريع</button>
+    <button class="tab-btn" data-tab="services">🛠️ الخدمات</button>
+    <button class="tab-btn" data-tab="images">🖼️ الصور</button>
     <button class="tab-btn" data-tab="customers">👥 العملاء</button>
     <button class="tab-btn" data-tab="offers">📢 إرسال عروض</button>
   </div>
@@ -205,6 +238,83 @@ tr:last-child td{border-bottom:none;}
       </table>
       <div class="empty-state" id="productsEmpty" style="display:none;">لسه مفيش منتجات مضافة</div>
     </div>
+  </div>
+
+  <!-- ---- تبويب: المشاريع (معرض أعمالنا) ---- -->
+  <div class="panel" id="panel-projects">
+    <div class="panel-header">
+      <h2>المشاريع (معرض أعمالنا)</h2>
+      <button class="btn-primary" id="showProjectForm">+ إضافة مشروع</button>
+    </div>
+    <div class="product-form" id="projectForm">
+      <div class="image-uploader">
+        <div class="up-preview" id="projImgPreview">🏗️</div>
+        <div class="up-controls">
+          <input type="file" accept="image/*" id="projImgInput">
+          <span class="up-status" id="projImgStatus">اختر صورة المشروع (تُضغط تلقائياً قبل الرفع)</span>
+        </div>
+        <input type="hidden" id="projImageUrl">
+      </div>
+      <div class="form-grid">
+        <div><label>عنوان المشروع / الموقع</label><input type="text" id="projTitle" placeholder="فيلا سكنية — الخرطوم"></div>
+        <div><label>التصنيف</label><input type="text" id="projCategory" placeholder="سكني / تجاري / صناعي"></div>
+        <div><label>المدينة</label><input type="text" id="projLocation" placeholder="الخرطوم"></div>
+        <div><label>الحالة</label>
+          <select id="projActive" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;">
+            <option value="true">منشور</option>
+            <option value="false">مخفي</option>
+          </select>
+        </div>
+        <div class="full"><label>وصف مختصر</label><textarea id="projDescription" rows="2" placeholder="مثال: 8 كاميرات + NVR — تركيب كامل خلال 3 أيام"></textarea></div>
+      </div>
+      <button class="btn-primary" id="saveProjectBtn">حفظ المشروع</button>
+      <button class="btn-outline" id="cancelProjectBtn" style="margin-right:8px;">إلغاء</button>
+      <input type="hidden" id="projEditId">
+    </div>
+    <div class="item-grid" id="projectsGrid"></div>
+    <div class="empty-state" id="projectsEmpty" style="display:none;">لسه مفيش مشاريع مضافة</div>
+  </div>
+
+  <!-- ---- تبويب: الخدمات ---- -->
+  <div class="panel" id="panel-services">
+    <div class="panel-header">
+      <h2>الخدمات (قسم خدماتنا في الموقع)</h2>
+      <button class="btn-primary" id="showServiceForm">+ إضافة خدمة</button>
+    </div>
+    <div class="product-form" id="serviceForm">
+      <div class="form-grid">
+        <div><label>الأيقونة (إيموجي)</label><input type="text" id="svcIcon" placeholder="🎥" maxlength="4"></div>
+        <div><label>العنوان</label><input type="text" id="svcTitle" placeholder="أنظمة المراقبة (CCTV)"></div>
+        <div><label>الوسم / التاغ الصغير</label><input type="text" id="svcTag" placeholder="متاح في الخرطوم، بحري، أمدرمان"></div>
+        <div><label>الحالة</label>
+          <select id="svcActive" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;">
+            <option value="true">منشور</option>
+            <option value="false">مخفي</option>
+          </select>
+        </div>
+        <div class="full"><label>الوصف</label><textarea id="svcDescription" rows="2" placeholder="وصف مختصر عن الخدمة"></textarea></div>
+      </div>
+      <button class="btn-primary" id="saveServiceBtn">حفظ الخدمة</button>
+      <button class="btn-outline" id="cancelServiceBtn" style="margin-right:8px;">إلغاء</button>
+      <input type="hidden" id="svcEditId">
+    </div>
+    <div class="item-grid" id="servicesGrid"></div>
+    <div class="empty-state" id="servicesEmpty" style="display:none;">لسه مفيش خدمات مضافة</div>
+  </div>
+
+  <!-- ---- تبويب: مكتبة الصور ---- -->
+  <div class="panel" id="panel-images">
+    <div class="panel-header">
+      <h2>مكتبة الصور</h2>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="file" accept="image/*" id="libImgInput" style="display:none;">
+        <button class="btn-primary" id="libUploadBtn">+ رفع صورة</button>
+        <button class="btn-outline" id="refreshImages">🔄 تحديث</button>
+      </div>
+    </div>
+    <p style="color:var(--muted);font-size:12.5px;margin-bottom:14px;">دوس على أي صورة عشان تنسخ رابطها، أو دوس ✕ لحذفها نهائياً. الصور دي هي نفسها اللي بتظهر في اختيار صورة المشروع/الخدمة.</p>
+    <div class="image-lib-grid" id="imagesGrid"></div>
+    <div class="empty-state" id="imagesEmpty" style="display:none;">لسه مفيش صور مرفوعة</div>
   </div>
 
   <!-- ---- تبويب: العملاء ---- -->
@@ -366,7 +476,7 @@ tr:last-child td{border-bottom:none;}
         <circle cx="50" cy="50" r="6" fill="#00A8E8"/>
       </svg>
       <div>
-        <div style="font-family:'Tajawal',sans-serif;font-weight:900;font-size:22px;color:#0B0F19;">الحسوبابابي</div>
+        <div style="font-family:'Tajawal',sans-serif;font-weight:900;font-size:22px;color:#0B0F19;">الحسوبابي</div>
         <div style="font-size:12px;color:#7C8499;">حلول تقنية وأمنية متكاملة</div>
       </div>
     </div>
@@ -385,7 +495,7 @@ tr:last-child td{border-bottom:none;}
     </div>
     <div style="flex:1;background:#F4F6FA;border-radius:12px;padding:16px 20px;">
       <div style="font-size:11.5px;font-weight:700;color:#7C8499;margin-bottom:6px;">صادر عن</div>
-      <div style="font-size:16px;font-weight:800;color:#0B0F19;">الحسوبابابي</div>
+      <div style="font-size:16px;font-weight:800;color:#0B0F19;">الحسوبابي</div>
       <div style="font-size:13px;color:#333B4D;margin-top:4px;">السودان</div>
     </div>
   </div>
@@ -421,7 +531,7 @@ tr:last-child td{border-bottom:none;}
 
   <div style="font-size:11.5px;color:#7C8499;line-height:1.9;border-top:1px solid #E3E8F0;padding-top:16px;">
     هذا العرض صالح لمدة <span id="qpValidity"></span> من تاريخ الإصدار. الأسعار قابلة للتغيير بعد انتهاء الصلاحية.<br>
-    نشكر ثقتكم بشركة الحسوبابابي.
+    نشكر ثقتكم بشركة الحسوبابي.
   </div>
 </div>
 
@@ -509,6 +619,9 @@ document.querySelectorAll('.tab-btn').forEach((btn) => {
     document.getElementById(`panel-${btn.dataset.tab}`).classList.add('active');
     if (btn.dataset.tab === 'leads') loadLeads();
     if (btn.dataset.tab === 'products') loadProducts();
+    if (btn.dataset.tab === 'projects') loadProjects();
+    if (btn.dataset.tab === 'services') loadServices();
+    if (btn.dataset.tab === 'images') loadImages();
     if (btn.dataset.tab === 'customers') loadCustomers();
     if (btn.dataset.tab === 'offers') { populateWaCustomerSelect(); populateQuoteCustomerSelect(); }
   });
@@ -630,6 +743,282 @@ document.getElementById('saveProductBtn').addEventListener('click', async () => 
   document.getElementById('productForm').classList.remove('active');
   showToast('تم الحفظ');
   loadProducts();
+});
+
+/* ---------- أدوات رفع الصور (ضغط في المتصفح ثم رفع للسيرفر) ---------- */
+function compressImage(file, maxDim = 1600, quality = 0.78) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('فشل قراءة الملف'));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('صورة غير صالحة'));
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxDim || height > maxDim) {
+          if (width > height) { height = Math.round(height * (maxDim / width)); width = maxDim; }
+          else { width = Math.round(width * (maxDim / height)); height = maxDim; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function uploadImageDataUrl(dataUrl, filename) {
+  const res = await api('/api/admin/upload', { method: 'POST', body: JSON.stringify({ dataUrl, filename }) });
+  if (!res.url) throw new Error(res.error || 'فشل رفع الصورة');
+  return res.url;
+}
+
+// يربط input[type=file] بمعاينة وحقل مخفي يحتفظ برابط الصورة النهائي بعد الرفع
+function wireImageUploader({ inputId, previewId, statusId, hiddenId, placeholderIcon }) {
+  const input = document.getElementById(inputId);
+  const preview = document.getElementById(previewId);
+  const status = document.getElementById(statusId);
+  const hidden = document.getElementById(hiddenId);
+  input.addEventListener('change', async () => {
+    const file = input.files[0];
+    if (!file) return;
+    status.textContent = 'جاري ضغط ورفع الصورة...';
+    try {
+      const compressedDataUrl = await compressImage(file);
+      preview.innerHTML = `<img src="${compressedDataUrl}" alt="">`;
+      const url = await uploadImageDataUrl(compressedDataUrl, file.name);
+      hidden.value = url;
+      status.textContent = 'تم رفع الصورة بنجاح ✓';
+    } catch (err) {
+      status.textContent = 'فشل رفع الصورة، جرّب مرة أخرى';
+      showToast('فشل رفع الصورة');
+    }
+  });
+  return () => { // reset helper
+    input.value = '';
+    hidden.value = '';
+    preview.innerHTML = placeholderIcon;
+    status.textContent = 'اختر صورة (تُضغط تلقائياً قبل الرفع)';
+  };
+}
+const resetProjectImageUploader = wireImageUploader({
+  inputId: 'projImgInput', previewId: 'projImgPreview', statusId: 'projImgStatus',
+  hiddenId: 'projImageUrl', placeholderIcon: '🏗️',
+});
+
+/* ---------- المشاريع (معرض أعمالنا) ---------- */
+let currentProjects = [];
+
+async function loadProjects() {
+  currentProjects = await api('/api/admin/projects');
+  const grid = document.getElementById('projectsGrid');
+  const empty = document.getElementById('projectsEmpty');
+  grid.innerHTML = '';
+  empty.style.display = currentProjects.length ? 'none' : 'block';
+
+  currentProjects.forEach((p, i) => {
+    const card = document.createElement('div');
+    card.className = 'item-card' + (p.active === false ? ' inactive' : '');
+    card.innerHTML = `
+      <div class="thumb">${p.imageUrl ? `<img src="${p.imageUrl}" alt="">` : '📷'}</div>
+      <div class="body">
+        <h4>${escapeHtml(p.title)}${p.active === false ? '<span class="badge-inactive">مخفي</span>' : ''}</h4>
+        <p>${escapeHtml(p.description || '')}</p>
+        <span class="meta">${escapeHtml(p.category || '—')} · ${escapeHtml(p.location || '—')}</span>
+      </div>
+      <div class="actions">
+        <div class="order-btns">
+          <button data-up="${p.id}" ${i === 0 ? 'disabled' : ''}>▲</button>
+          <button data-down="${p.id}" ${i === currentProjects.length - 1 ? 'disabled' : ''}>▼</button>
+        </div>
+        <button class="btn-outline" data-edit-proj="${p.id}">تعديل</button>
+        <button class="btn-danger" data-del-proj="${p.id}">حذف</button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  grid.querySelectorAll('[data-edit-proj]').forEach((el) => el.addEventListener('click', () => {
+    openProjectForm(currentProjects.find((p) => p.id === el.dataset.editProj));
+  }));
+  grid.querySelectorAll('[data-del-proj]').forEach((el) => el.addEventListener('click', async () => {
+    if (!confirm('متأكد من حذف المشروع؟')) return;
+    await api(`/api/admin/projects/${el.dataset.delProj}`, { method: 'DELETE' });
+    loadProjects();
+  }));
+  grid.querySelectorAll('[data-up]').forEach((el) => el.addEventListener('click', () => reorderItem('projects', currentProjects, el.dataset.up, -1)));
+  grid.querySelectorAll('[data-down]').forEach((el) => el.addEventListener('click', () => reorderItem('projects', currentProjects, el.dataset.down, 1)));
+}
+
+async function reorderItem(type, list, id, direction) {
+  const idx = list.findIndex((x) => x.id === id);
+  const swapWith = idx + direction;
+  if (swapWith < 0 || swapWith >= list.length) return;
+  const ids = list.map((x) => x.id);
+  [ids[idx], ids[swapWith]] = [ids[swapWith], ids[idx]];
+  await api(`/api/admin/reorder/${type}`, { method: 'POST', body: JSON.stringify({ ids }) });
+  if (type === 'projects') loadProjects(); else loadServices();
+}
+
+function openProjectForm(p) {
+  document.getElementById('projectForm').classList.add('active');
+  document.getElementById('projEditId').value = p ? p.id : '';
+  document.getElementById('projTitle').value = p ? p.title : '';
+  document.getElementById('projCategory').value = p ? p.category : '';
+  document.getElementById('projLocation').value = p ? p.location : '';
+  document.getElementById('projDescription').value = p ? p.description : '';
+  document.getElementById('projActive').value = p ? String(p.active !== false) : 'true';
+  document.getElementById('projImageUrl').value = p ? (p.imageUrl || '') : '';
+  document.getElementById('projImgPreview').innerHTML = p && p.imageUrl ? `<img src="${p.imageUrl}" alt="">` : '🏗️';
+  document.getElementById('projImgStatus').textContent = 'اختر صورة المشروع (تُضغط تلقائياً قبل الرفع)';
+}
+document.getElementById('showProjectForm').addEventListener('click', () => openProjectForm(null));
+document.getElementById('cancelProjectBtn').addEventListener('click', () => {
+  document.getElementById('projectForm').classList.remove('active');
+});
+document.getElementById('saveProjectBtn').addEventListener('click', async () => {
+  const id = document.getElementById('projEditId').value;
+  const payload = {
+    title: document.getElementById('projTitle').value,
+    category: document.getElementById('projCategory').value,
+    location: document.getElementById('projLocation').value,
+    description: document.getElementById('projDescription').value,
+    active: document.getElementById('projActive').value === 'true',
+    imageUrl: document.getElementById('projImageUrl').value,
+  };
+  if (!payload.title) { showToast('عنوان المشروع مطلوب'); return; }
+  if (id) await api(`/api/admin/projects/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
+  else await api('/api/admin/projects', { method: 'POST', body: JSON.stringify(payload) });
+  document.getElementById('projectForm').classList.remove('active');
+  showToast('تم حفظ المشروع');
+  loadProjects();
+});
+
+/* ---------- الخدمات ---------- */
+let currentServices = [];
+
+async function loadServices() {
+  currentServices = await api('/api/admin/services');
+  const grid = document.getElementById('servicesGrid');
+  const empty = document.getElementById('servicesEmpty');
+  grid.innerHTML = '';
+  empty.style.display = currentServices.length ? 'none' : 'block';
+
+  currentServices.forEach((s, i) => {
+    const card = document.createElement('div');
+    card.className = 'item-card' + (s.active === false ? ' inactive' : '');
+    card.innerHTML = `
+      <div class="thumb" style="font-size:36px;">${s.icon || '🛠️'}</div>
+      <div class="body">
+        <h4>${escapeHtml(s.title)}${s.active === false ? '<span class="badge-inactive">مخفي</span>' : ''}</h4>
+        <p>${escapeHtml(s.description || '')}</p>
+        <span class="meta">${escapeHtml(s.tag || '')}</span>
+      </div>
+      <div class="actions">
+        <div class="order-btns">
+          <button data-up="${s.id}" ${i === 0 ? 'disabled' : ''}>▲</button>
+          <button data-down="${s.id}" ${i === currentServices.length - 1 ? 'disabled' : ''}>▼</button>
+        </div>
+        <button class="btn-outline" data-edit-svc="${s.id}">تعديل</button>
+        <button class="btn-danger" data-del-svc="${s.id}">حذف</button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  grid.querySelectorAll('[data-edit-svc]').forEach((el) => el.addEventListener('click', () => {
+    openServiceForm(currentServices.find((s) => s.id === el.dataset.editSvc));
+  }));
+  grid.querySelectorAll('[data-del-svc]').forEach((el) => el.addEventListener('click', async () => {
+    if (!confirm('متأكد من حذف الخدمة؟')) return;
+    await api(`/api/admin/services/${el.dataset.delSvc}`, { method: 'DELETE' });
+    loadServices();
+  }));
+  grid.querySelectorAll('[data-up]').forEach((el) => el.addEventListener('click', () => reorderItem('services', currentServices, el.dataset.up, -1)));
+  grid.querySelectorAll('[data-down]').forEach((el) => el.addEventListener('click', () => reorderItem('services', currentServices, el.dataset.down, 1)));
+}
+
+function openServiceForm(s) {
+  document.getElementById('serviceForm').classList.add('active');
+  document.getElementById('svcEditId').value = s ? s.id : '';
+  document.getElementById('svcIcon').value = s ? s.icon : '🛠️';
+  document.getElementById('svcTitle').value = s ? s.title : '';
+  document.getElementById('svcTag').value = s ? s.tag : '';
+  document.getElementById('svcDescription').value = s ? s.description : '';
+  document.getElementById('svcActive').value = s ? String(s.active !== false) : 'true';
+}
+document.getElementById('showServiceForm').addEventListener('click', () => openServiceForm(null));
+document.getElementById('cancelServiceBtn').addEventListener('click', () => {
+  document.getElementById('serviceForm').classList.remove('active');
+});
+document.getElementById('saveServiceBtn').addEventListener('click', async () => {
+  const id = document.getElementById('svcEditId').value;
+  const payload = {
+    icon: document.getElementById('svcIcon').value,
+    title: document.getElementById('svcTitle').value,
+    tag: document.getElementById('svcTag').value,
+    description: document.getElementById('svcDescription').value,
+    active: document.getElementById('svcActive').value === 'true',
+  };
+  if (!payload.title) { showToast('عنوان الخدمة مطلوب'); return; }
+  if (id) await api(`/api/admin/services/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
+  else await api('/api/admin/services', { method: 'POST', body: JSON.stringify(payload) });
+  document.getElementById('serviceForm').classList.remove('active');
+  showToast('تم حفظ الخدمة');
+  loadServices();
+});
+
+/* ---------- مكتبة الصور ---------- */
+async function loadImages() {
+  const images = await api('/api/admin/images');
+  const grid = document.getElementById('imagesGrid');
+  const empty = document.getElementById('imagesEmpty');
+  grid.innerHTML = '';
+  empty.style.display = images.length ? 'none' : 'block';
+
+  images.forEach((img) => {
+    const div = document.createElement('div');
+    div.className = 'image-lib-item';
+    div.innerHTML = `
+      <img src="${img.url}" alt="">
+      <button class="lib-del" data-del-img="${img.url}">✕</button>
+      <button class="lib-copy" data-copy-img="${img.url}">نسخ الرابط</button>
+    `;
+    grid.appendChild(div);
+  });
+
+  grid.querySelectorAll('[data-del-img]').forEach((el) => el.addEventListener('click', async () => {
+    if (!confirm('متأكد من حذف الصورة نهائياً؟ لو مستخدمة في مشروع أو خدمة هتختفي من هناك برضو.')) return;
+    await api('/api/admin/images', { method: 'DELETE', body: JSON.stringify({ url: el.dataset.delImg }) });
+    loadImages();
+  }));
+  grid.querySelectorAll('[data-copy-img]').forEach((el) => el.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(el.dataset.copyImg);
+      showToast('تم نسخ رابط الصورة');
+    } catch (err) {
+      showToast('تعذّر النسخ التلقائي، انسخ الرابط يدوياً');
+    }
+  }));
+}
+document.getElementById('refreshImages').addEventListener('click', loadImages);
+document.getElementById('libUploadBtn').addEventListener('click', () => document.getElementById('libImgInput').click());
+document.getElementById('libImgInput').addEventListener('change', async () => {
+  const file = document.getElementById('libImgInput').files[0];
+  if (!file) return;
+  showToast('جاري رفع الصورة...');
+  try {
+    const compressedDataUrl = await compressImage(file);
+    await uploadImageDataUrl(compressedDataUrl, file.name);
+    showToast('تم رفع الصورة');
+    document.getElementById('libImgInput').value = '';
+    loadImages();
+  } catch (err) {
+    showToast('فشل رفع الصورة');
+  }
 });
 
 /* ---------- العملاء ---------- */
@@ -981,7 +1370,7 @@ document.getElementById('sendQuoteWaBtn').addEventListener('click', async () => 
     pdf.save(fileName);
 
     const message = [
-      `عرض سعر رقم ${quoteNumber} — الحسوبابابي`,
+      `عرض سعر رقم ${quoteNumber} — الحسوبابي`,
       `العميل: ${data.clientName}`,
       `الخدمة: ${data.service}`,
       `مدة التنفيذ: ${data.duration}`,
